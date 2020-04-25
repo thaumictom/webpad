@@ -1,0 +1,171 @@
+<!-- PADVIEWER WEB by ThaumicTom (2020) -->
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        :root {
+            /* Color coding of the entire UI */
+            --accel: #00ff00;
+            --brake: #ff0000;
+            --steer: #ff9900;
+            --padbg: #ffffff;
+            --allbg: #880088;
+            /* Deadzone (ls = Left stick; tr = Triggers) */
+            --dz_ls: 0.1;
+            --dz_tr: 0;
+        }
+
+        html,
+        body {
+            margin: 0;
+            height: 100%;
+            background-color: var(--allbg);
+        }
+
+        .main {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .col {
+            margin: 8px;
+        }
+
+        #steerL {
+            width: 200px;
+            height: 250px;
+            clip-path: polygon(0 50%, 100% 100%, 100% 0);
+        }
+
+        #steerR {
+            width: 200px;
+            height: 250px;
+            clip-path: polygon(100% 50%, 0 0, 0 100%);
+        }
+
+        #accel {
+            width: 132px;
+            height: 165px;
+            clip-path: polygon(50% 0%, 100% 25%, 100% 100%, 0 100%, 0 25%);
+        }
+
+        #brake {
+            margin-top: 20px;
+            width: 132px;
+            height: 165px;
+            clip-path: polygon(50% 100%, 0 75%, 0 0, 100% 0, 100% 75%);
+        }
+
+        #notif {
+            font-size: 2em;
+            color: #fff;
+            font-family: Arial, Helvetica, sans-serif;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main">
+        <div class="col">
+            <div id="steerL"></div>
+        </div>
+        <div class="col">
+            <div id="accel"></div>
+            <div id="notif">Press any button<br>
+                on your pad.</div>
+            <div id="brake"></div>
+        </div>
+        <div class="col">
+            <div id="steerR"></div>
+        </div>
+    </div>
+</body>
+<script>
+    var ls, tr, gp, time;
+    var keys = {
+        accel: 8,
+        brake: 9
+    }
+    // Css vars
+    var padbg = getComputedStyle(document.documentElement).getPropertyValue('--padbg');
+    var accel = getComputedStyle(document.documentElement).getPropertyValue('--accel');
+    var brake = getComputedStyle(document.documentElement).getPropertyValue('--brake');
+    var steer = getComputedStyle(document.documentElement).getPropertyValue('--steer');
+    var dz_ls = getComputedStyle(document.documentElement).getPropertyValue('--dz_ls');;
+    var dz_tr = getComputedStyle(document.documentElement).getPropertyValue('--dz_tr');;
+
+    window.addEventListener("gamepadconnected", (event) => {
+        document.getElementById("notif").style.display = "none"
+        setInterval(loop, 16);
+    });
+
+    window.addEventListener("gamepaddisconnected", (event) => {
+        clearInterval(loop);
+        document.getElementById("brake").style.background = "transparent";
+        document.getElementById("accel").style.background = "transparent";
+        document.getElementById("steerR").style.background = "transparent";
+        document.getElementById("steerL").style.background = "transparent";
+        document.getElementById("notif").style.display = "block"
+    });
+
+    function loop() {
+        gp = navigator.getGamepads()[0];
+        if (time != gp.timestamp) {
+            // 1 = Brake pedal
+            if (gp.axes[1] > dz_tr) {
+                tr = (gp.axes[1] - dz_tr) / (1 - dz_tr)
+                document.getElementById("brake").style.background = "linear-gradient(180deg, " + brake + " " + tr * 100 +
+                    "%, " + padbg + " " + tr * 100 + "%)"
+            } else {
+                document.getElementById("brake").style.background = "linear-gradient(180deg, " + brake + " 0%, " + padbg +
+                    " 0%)"
+            }
+            // 5 = Accel pedal
+            if (gp.axes[5] > dz_tr) {
+                tr = (gp.axes[5] - dz_tr) / (1 - dz_tr)
+                document.getElementById("accel").style.background = "linear-gradient(0deg, " + accel + " " + tr * 100 +
+                    "%, " + padbg + " " + tr * 100 + "%)"
+            } else {
+                document.getElementById("accel").style.background = "linear-gradient(0deg, " + accel + " 0%, " + padbg +
+                    " 0%)"
+            }
+            // 0 = Left Stick (Right) 
+            if (gp.axes[0] > dz_ls) {
+                ls = (gp.axes[0] - dz_ls) / (1 - dz_ls)
+                document.getElementById("steerR").style.background = "linear-gradient(90deg, " + steer + " " + ls *
+                    100 +
+                    "%, " + padbg + " " + ls * 100 + "%)"
+            } else {
+                document.getElementById("steerR").style.background = "linear-gradient(90deg, " + steer + " 0%, " +
+                    padbg +
+                    " 0%)"
+            }
+            // 0 = Left Stick (Left)
+            if (gp.axes[0] < -dz_ls) {
+                ls = (-gp.axes[0] - dz_ls) / (1 - dz_ls)
+                document.getElementById("steerL").style.background = "linear-gradient(270deg, " + steer + " " + ls *
+                    100 +
+                    "%, " + padbg + " " + ls * 100 + "%)"
+            } else {
+                document.getElementById("steerL").style.background = "linear-gradient(270deg, " + steer + " 0%, " +
+                    padbg +
+                    " 0%)"
+            }
+            // 8 = A button
+            if (gp.buttons[keys["accel"]].value == 1) {
+                document.getElementById("accel").style.background = "linear-gradient(0deg, #000 0%, " + accel + " 0%)"
+            }
+            // 9 = X button
+            if (gp.buttons[keys["brake"]].value == 1) {
+                document.getElementById("brake").style.background = "linear-gradient(0deg, #000 0%, " + brake + " 0%)"
+            }
+        }
+        time = gp.timestamp;
+    }
+</script>
+
+</html>
