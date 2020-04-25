@@ -69,6 +69,8 @@
 </head>
 
 <body>
+    <div id="debug" style="position:absolute; color: white; font-family: Arial, Helvetica, sans-serif; width: 400px">
+    </div>
     <div class="main">
         <div class="col">
             <div id="steerL"></div>
@@ -85,7 +87,7 @@
     </div>
 </body>
 <script>
-    var ls, tr, gp, time;
+    var ls, tr, gp, time, debug;
     var keys = {
         accel: 8,
         brake: 9
@@ -100,6 +102,7 @@
 
     window.addEventListener("gamepadconnected", (event) => {
         document.getElementById("notif").style.display = "none"
+        console.log(navigator.getGamepads()[0])
         setInterval(loop, 16);
     });
 
@@ -118,10 +121,12 @@
             // 1 = Brake pedal
             if (gp.axes[1] > dz_tr) {
                 tr = (gp.axes[1] - dz_tr) / (1 - dz_tr)
-                document.getElementById("brake").style.background = "linear-gradient(180deg, " + brake + " " + tr * 100 +
+                document.getElementById("brake").style.background = "linear-gradient(180deg, " + brake + " " + tr *
+                    100 +
                     "%, " + padbg + " " + tr * 100 + "%)"
             } else {
-                document.getElementById("brake").style.background = "linear-gradient(180deg, " + brake + " 0%, " + padbg +
+                document.getElementById("brake").style.background = "linear-gradient(180deg, " + brake + " 0%, " +
+                    padbg +
                     " 0%)"
             }
             // 5 = Accel pedal
@@ -163,7 +168,15 @@
             if (gp.buttons[keys["brake"]].value == 1) {
                 document.getElementById("brake").style.background = "linear-gradient(0deg, #000 0%, " + brake + " 0%)"
             }
-            console.log(gp)
+            debug = gp.id + "<br><br>" + gp.timestamp + "<br><br>"
+            for (x in gp.axes) {
+                debug += "A" + x + ": " + gp.axes[x] + "<br>"
+            }
+            debug += "<br>"
+            for (x in gp.buttons) {
+                debug += "B" + x + ": " + gp.buttons[x].value + "<br>"
+            }
+            document.getElementById("debug").innerHTML = debug
         }
         time = gp.timestamp;
     }
