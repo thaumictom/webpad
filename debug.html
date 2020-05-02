@@ -87,7 +87,7 @@
     </div>
 </body>
 <script>
-    var ls, tr, gp, time, debug;
+    var ls, tr, gp, time, debug, gpdefault, override = "n";
     var keys = {
         accel: 8,
         brake: 9
@@ -97,12 +97,26 @@
     var accel = getComputedStyle(document.documentElement).getPropertyValue('--accel');
     var brake = getComputedStyle(document.documentElement).getPropertyValue('--brake');
     var steer = getComputedStyle(document.documentElement).getPropertyValue('--steer');
-    var dz_ls = getComputedStyle(document.documentElement).getPropertyValue('--dz_ls');;
-    var dz_tr = getComputedStyle(document.documentElement).getPropertyValue('--dz_tr');;
+    var dz_ls = getComputedStyle(document.documentElement).getPropertyValue('--dz_ls');
+    var dz_tr = getComputedStyle(document.documentElement).getPropertyValue('--dz_tr');
+
+    // Query stuff
+    var urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('player')) {
+        if (urlParams.get('player').match(/[0-3]/g))
+            override = urlParams.get('player')
+    }
 
     window.addEventListener("gamepadconnected", (event) => {
         document.getElementById("notif").style.display = "none"
-        console.log(navigator.getGamepads()[0])
+        for (var i = 0; i < 4; i++) {
+            gp = navigator.getGamepads()[i]
+            console.log(gp)
+            if (gp != null && override != "n") {
+                gpdefault = i
+            }
+        }
+        console.log(gpdefault)
         setInterval(loop, 16);
     });
 
@@ -116,57 +130,67 @@
     });
 
     function loop() {
-        gp = navigator.getGamepads()[0];
+        gp = navigator.getGamepads()[gpdefault];
         if (time != gp.timestamp) {
             // 1 = Brake pedal
             if (gp.axes[1] > dz_tr) {
                 tr = (gp.axes[1] - dz_tr) / (1 - dz_tr)
-                document.getElementById("brake").style.background = "linear-gradient(180deg, " + brake + " " + tr *
+                document.getElementById("brake").style.background = "linear-gradient(180deg, " + brake + " " +
+                    tr *
                     100 +
                     "%, " + padbg + " " + tr * 100 + "%)"
             } else {
-                document.getElementById("brake").style.background = "linear-gradient(180deg, " + brake + " 0%, " +
+                document.getElementById("brake").style.background = "linear-gradient(180deg, " + brake +
+                    " 0%, " +
                     padbg +
                     " 0%)"
             }
             // 5 = Accel pedal
             if (gp.axes[5] > dz_tr) {
                 tr = (gp.axes[5] - dz_tr) / (1 - dz_tr)
-                document.getElementById("accel").style.background = "linear-gradient(0deg, " + accel + " " + tr * 100 +
+                document.getElementById("accel").style.background = "linear-gradient(0deg, " + accel + " " +
+                    tr * 100 +
                     "%, " + padbg + " " + tr * 100 + "%)"
             } else {
-                document.getElementById("accel").style.background = "linear-gradient(0deg, " + accel + " 0%, " + padbg +
+                document.getElementById("accel").style.background = "linear-gradient(0deg, " + accel + " 0%, " +
+                    padbg +
                     " 0%)"
             }
             // 0 = Left Stick (Right) 
             if (gp.axes[0] > dz_ls) {
                 ls = (gp.axes[0] - dz_ls) / (1 - dz_ls)
-                document.getElementById("steerR").style.background = "linear-gradient(90deg, " + steer + " " + ls *
+                document.getElementById("steerR").style.background = "linear-gradient(90deg, " + steer + " " +
+                    ls *
                     100 +
                     "%, " + padbg + " " + ls * 100 + "%)"
             } else {
-                document.getElementById("steerR").style.background = "linear-gradient(90deg, " + steer + " 0%, " +
+                document.getElementById("steerR").style.background = "linear-gradient(90deg, " + steer +
+                    " 0%, " +
                     padbg +
                     " 0%)"
             }
             // 0 = Left Stick (Left)
             if (gp.axes[0] < -dz_ls) {
                 ls = (-gp.axes[0] - dz_ls) / (1 - dz_ls)
-                document.getElementById("steerL").style.background = "linear-gradient(270deg, " + steer + " " + ls *
+                document.getElementById("steerL").style.background = "linear-gradient(270deg, " + steer + " " +
+                    ls *
                     100 +
                     "%, " + padbg + " " + ls * 100 + "%)"
             } else {
-                document.getElementById("steerL").style.background = "linear-gradient(270deg, " + steer + " 0%, " +
+                document.getElementById("steerL").style.background = "linear-gradient(270deg, " + steer +
+                    " 0%, " +
                     padbg +
                     " 0%)"
             }
             // 8 = A button
             if (gp.buttons[keys["accel"]].value == 1) {
-                document.getElementById("accel").style.background = "linear-gradient(0deg, #000 0%, " + accel + " 0%)"
+                document.getElementById("accel").style.background = "linear-gradient(0deg, #000 0%, " + accel +
+                    " 0%)"
             }
             // 9 = X button
             if (gp.buttons[keys["brake"]].value == 1) {
-                document.getElementById("brake").style.background = "linear-gradient(0deg, #000 0%, " + brake + " 0%)"
+                document.getElementById("brake").style.background = "linear-gradient(0deg, #000 0%, " + brake +
+                    " 0%)"
             }
             debug = gp.id + "<br><br>" + gp.timestamp + "<br><br>"
             for (x in gp.axes) {
