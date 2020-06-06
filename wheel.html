@@ -1,0 +1,255 @@
+<!-- PADVIEWER WEB by ThaumicTom (2020) -->
+<!DOCTYPE html>
+<html>
+
+<head>
+    <!-- dependencies -->
+    <style>
+        :root {
+            /* Color coding of the entire UI */
+            --accel: #00ff00;
+            --brake: #ff0000;
+            --steer: #ff9900;
+            --padbg: #ffffff;
+            --allbg: #880088;
+            /* Deadzone (ls = Wheel; tr = Pedals) */
+            --dz_ls: 0.1;
+            --dz_tr: 0.1;
+            /* Keys, only use integers */
+            --key_accel: 8;
+            --key_brake: 9;
+            --key_accel_analog: 5;
+            --key_brake_analog: 1;
+            --key_axissteer: 0;
+        }
+
+        html,
+        body {
+            margin: 0;
+            height: 100%;
+            background-color: var(--allbg);
+        }
+
+        .main {
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .col {
+            margin: 8px;
+        }
+
+        #wheel,
+        #wheel-overlay {
+            width: 300px;
+            height: 300px;
+        }
+
+        #wheel-overlay {
+            position: absolute;
+        }
+
+        #notif,
+        #error {
+            font-size: 2em;
+            color: #fff;
+            font-family: Arial, Helvetica, sans-serif;
+            text-align: center;
+        }
+
+        .svg {
+            fill: var(--padbg);
+        }
+
+        #dbrake {
+            fill: var(--brake);
+            transform-origin: 362px 362px;
+        }
+
+        #daccel {
+            fill: var(--accel);
+            transform-origin: 362px 362px;
+        }
+
+        #dwheel {
+            fill: var(--steer);
+        }
+
+        #visualizer,
+        #error {
+            display: none;
+        }
+
+        #error {
+            animation: error 2s infinite ease-out;
+        }
+
+        @keyframes error {
+            0% {
+                color: #fff
+            }
+
+            50% {
+                color: #f00
+            }
+
+            100% {
+                color: #fff
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main">
+        <div class="col" id="visualizer">
+            <div id="wheel-overlay">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 722 585.27">
+                    <circle id="max-right" class="svg" cx="676" cy="361.5" r="9" />
+                    <circle id="max-left" class="svg" cx="46" cy="361.5" r="9" />
+                </svg>
+            </div>
+            <div id="wheel">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 722 585.27">
+                    <defs>
+                        <clipPath id="accelcut">
+                            <path
+                                d="M547.05,164.4A269,269,0,0,0,361.5,90.5c-148.79,0-269.46,120.34-270,269,0,.33,0,.67,0,1v.44a17.66,17.66,0,0,0,17.69,17.56h.63a17.7,17.7,0,0,0,17.68-17.76v-.24c0-.33,0-.67,0-1,.53-128.77,105.09-233,234-233a233.15,233.15,0,0,1,160.09,63.37Z" />
+                        </clipPath>
+                        <clipPath id="brakecut">
+                            <path
+                                d="M631.49,359.5a269,269,0,0,0-74.87-185.58l-25.46,25.46A233.14,233.14,0,0,1,595.49,359.5c0,.33,0,.67,0,1v.18a17.72,17.72,0,0,0,17.68,17.82h.63a17.66,17.66,0,0,0,17.69-17.56v-.44C631.5,360.17,631.49,359.83,631.49,359.5Z" />
+                        </clipPath>
+                    </defs>
+                    <path class="svg"
+                        d="M361,0.5C161.9,0.5,0.5,161.9,0.5,361c0,77.8,24.6,149.8,66.5,208.6
+                        c12.5,17.6,37.6,20.3,53.6,5.8h0c13.7-12.4,15.9-33,5.1-48.1c-33.5-47.1-53.3-104.7-53.3-166.9c0-159.1,129.8-288.5,288.9-288
+                        C520,73,648.5,201.7,648.5,360.5c0,62-19.6,119.4-52.9,166.4c-10.8,15.2-8.5,36,5.4,48.5l0,0c16.2,14.6,41.6,11.9,54.2-5.9
+                        c41.8-58.8,66.3-130.8,66.3-208.4C721.5,161.9,560.1,0.5,361,0.5z M337.5,59.1L361,18.4l23.5,40.7H337.5z" />
+                    <path id="dwheel"
+                        d="M361,0.5C161.9,0.5,0.5,161.9,0.5,361c0,77.8,24.6,149.8,66.5,208.6
+                        c12.5,17.6,37.6,20.3,53.6,5.8h0c13.7-12.4,15.9-33,5.1-48.1c-33.5-47.1-53.3-104.7-53.3-166.9c0-159.1,129.8-288.5,288.9-288
+                        C520,73,648.5,201.7,648.5,360.5c0,62-19.6,119.4-52.9,166.4c-10.8,15.2-8.5,36,5.4,48.5l0,0c16.2,14.6,41.6,11.9,54.2-5.9
+                        c41.8-58.8,66.3-130.8,66.3-208.4C721.5,161.9,560.1,0.5,361,0.5z M337.5,59.1L361,18.4l23.5,40.7H337.5z" />
+                    <path class="svg" id="accel"
+                        d="M547.05,164.4A269,269,0,0,0,361.5,90.5c-148.79,0-269.46,120.34-270,269,0,.33,0,.67,0,1v.44a17.66,17.66,0,0,0,17.69,17.56h.63a17.7,17.7,0,0,0,17.68-17.76v-.24c0-.33,0-.67,0-1,.53-128.77,105.09-233,234-233a233.15,233.15,0,0,1,160.09,63.37Z" />
+                    <g clip-path="url(#accelcut)">
+                        <path id="daccel" style="transform: rotate(137deg);"
+                            d="M547.05,164.4A269,269,0,0,0,361.5,90.5c-148.79,0-269.46,120.34-270,269,0,.33,0,.67,0,1v.44a17.66,17.66,0,0,0,17.69,17.56h.63a17.7,17.7,0,0,0,17.68-17.76v-.24c0-.33,0-.67,0-1,.53-128.77,105.09-233,234-233a233.15,233.15,0,0,1,160.09,63.37Z" />
+                    </g>
+                    <path class="svg" id="brake"
+                        d="M631.49,359.5a269,269,0,0,0-74.87-185.58l-25.46,25.46A233.14,233.14,0,0,1,595.49,359.5c0,.33,0,.67,0,1v.18a17.72,17.72,0,0,0,17.68,17.82h.63a17.66,17.66,0,0,0,17.69-17.56v-.44C631.5,360.17,631.49,359.83,631.49,359.5Z" />
+                    <g clip-path="url(#brakecut)">
+                        <path id="dbrake" style="transform: rotate(-48deg);"
+                            d="M631.49,359.5a269,269,0,0,0-74.87-185.58l-25.46,25.46A233.14,233.14,0,0,1,595.49,359.5c0,.33,0,.67,0,1v.18a17.72,17.72,0,0,0,17.68,17.82h.63a17.66,17.66,0,0,0,17.69-17.56v-.44C631.5,360.17,631.49,359.83,631.49,359.5Z" />
+                    </g>
+                </svg>
+            </div>
+        </div>
+        <div class="col">
+            <div id="notif">Press any button<br>
+                on your device.</div>
+            <div id="error">Device<br>
+                disconnected.</div>
+        </div>
+    </div>
+</body>
+<script>
+    var ls, tr, gp, time, gpdefault, keys, override = "n";
+    // Css vars
+    var padbg = getComputedStyle(document.documentElement).getPropertyValue('--padbg');
+    var accel = getComputedStyle(document.documentElement).getPropertyValue('--accel');
+    var brake = getComputedStyle(document.documentElement).getPropertyValue('--brake');
+    var steer = getComputedStyle(document.documentElement).getPropertyValue('--steer');
+    var dz_ls = getComputedStyle(document.documentElement).getPropertyValue('--dz_ls');
+    var dz_tr = getComputedStyle(document.documentElement).getPropertyValue('--dz_tr');
+
+    var key_accel = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--key_accel'), 10);
+    var key_brake = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--key_brake'), 10);
+    var key_accel_analog = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--key_accel_analog'), 10);
+    var key_brake_analog = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--key_brake_analog'), 10);
+    var key_axissteer = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--key_axissteer'), 10);
+
+    // Query stuff
+    var urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('player')) {
+        if (urlParams.get('player').match(/[0-3]/g))
+            override = urlParams.get('player')
+    }
+
+    window.addEventListener("gamepadconnected", (event) => {
+        document.getElementById("notif").style.display = "none"
+        document.getElementById("error").style.display = "none"
+        document.getElementById("visualizer").style.display = "block"
+        for (var i = 0; i < 4; i++) {
+            gp = navigator.getGamepads()[i]
+            console.log(gp)
+            if (gp != null && override == "n") {
+                gpdefault = i
+            } else if (override != "n") {
+                gpdefault = override
+            }
+        }
+        console.log(gpdefault)
+        setInterval(loop, 16);
+    });
+
+    window.addEventListener("gamepaddisconnected", (event) => {
+        clearInterval(loop);
+        document.getElementById("visualizer").style.display = "none";
+        document.getElementById("error").style.display = "block"
+    });
+
+    function loop() {
+        gp = navigator.getGamepads()[gpdefault];
+        if (time != gp.timestamp) {
+            // Accel analog
+            if (gp.axes[key_accel_analog] < -dz_tr) {
+                tr = (gp.axes[5] + 1) * 137 / (-dz_tr + 1)
+                document.getElementById("daccel").style.transform = "rotate(" + tr + "deg)"
+            } else {
+                document.getElementById("daccel").style.transform = "rotate(137deg)"
+            }
+            // Brake analog
+            if (gp.axes[key_brake_analog] < -dz_tr) {
+                tr = (gp.axes[1] + 1) * -48 / (-dz_tr + 1)
+                document.getElementById("dbrake").style.transform = "rotate(" + tr + "deg)"
+            } else {
+                document.getElementById("dbrake").style.transform = "rotate(-48deg)"
+            }
+            // Accel
+            if (gp.buttons[key_accel].value == 1) {
+                document.getElementById("daccel").style.transform = "rotate(0deg)"
+            }
+            // Brake
+            if (gp.buttons[key_brake].value == 1) {
+                document.getElementById("dbrake").style.transform = "rotate(0deg)"
+            }
+            // Right Steer
+            if (gp.axes[key_axissteer] > dz_ls) {
+                ls = ((gp.axes[key_axissteer] - dz_ls) * 90) / (1 - dz_ls)
+                lsx = (gp.axes[key_axissteer] - dz_ls) / (1 - dz_ls)
+                document.getElementById("wheel").style.transform = "rotate(" + ls + "deg)"
+                document.getElementById("dwheel").style.opacity = lsx
+                document.getElementById("max-left").style.opacity = 0;
+                document.getElementById("max-right").style.opacity = 1;
+            } else {
+                document.getElementById("wheel").style.transform = "rotate(0)"
+                document.getElementById("max-left").style.opacity = 1;
+            }
+            // Left Steer
+            if (gp.axes[key_axissteer] < -dz_ls) {
+                ls = ((-gp.axes[key_axissteer] - dz_ls) * 90) / (1 - dz_ls)
+                lsx = (-gp.axes[key_axissteer] - dz_ls) / (1 - dz_ls)
+                document.getElementById("wheel").style.transform = "rotate(" + -ls + "deg)"
+                document.getElementById("dwheel").style.opacity = lsx
+                document.getElementById("max-right").style.opacity = 0;
+            }
+        }
+        time = gp.timestamp;
+    }
+</script>
+
+</html>
