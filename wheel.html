@@ -73,7 +73,7 @@
             transform-origin: 362px 362px;
         }
 
-        #dwheel {
+        #dwheel, #max-right, #max-left {
             fill: var(--steer);
         }
 
@@ -238,6 +238,7 @@
             } else {
                 document.getElementById("wheel").style.transform = "rotate(0)"
                 document.getElementById("max-left").style.opacity = 1;
+                document.getElementById("dwheel").style.opacity = 0;
             }
             // Left Steer
             if (gp.axes[key_axissteer] < -dz_ls) {
