@@ -6,7 +6,7 @@
     <style>
         :root {
             /* Color coding of the entire UI */
-            --accel: #00ff00;
+            --accel: #00f8f8;
             --brake: #ff0000;
             --steer: #ff9900;
             --padbg: #ffffff;
@@ -59,11 +59,31 @@
             clip-path: polygon(50% 100%, 0 75%, 0 0, 100% 0, 100% 75%);
         }
 
-        #notif {
+        #notif,
+        #error {
             font-size: 2em;
             color: #fff;
             font-family: Arial, Helvetica, sans-serif;
             text-align: center;
+        }
+
+        #error {
+            display: none;
+            animation: error 2s infinite ease-out;
+        }
+
+        @keyframes error {
+            0% {
+                color: #fff
+            }
+
+            50% {
+                color: #f00
+            }
+
+            100% {
+                color: #fff
+            }
         }
     </style>
 </head>
@@ -77,6 +97,8 @@
             <div id="accel"></div>
             <div id="notif">Press any button<br>
                 on your pad.</div>
+                <div id="error">Device<br>
+                    disconnected.</div>
             <div id="brake"></div>
         </div>
         <div class="col">
@@ -85,13 +107,8 @@
     </div>
 </body>
 <script>
-    var ls, tr, gp, time;
-    var keys = {
-        accel: 0,
-        brake: 2,
-        accel2: 7,
-        brake2: 6
-    }
+    var ls, tr, gp, time, override = "n", gpdefault, keys, key_accel = 0, key_brake = 2, key_accel2 = 7, key_brake2 = 6;
+
     // Css vars
     var padbg = getComputedStyle(document.documentElement).getPropertyValue('--padbg');
     var accel = getComputedStyle(document.documentElement).getPropertyValue('--accel');
@@ -100,8 +117,47 @@
     var dz_ls = getComputedStyle(document.documentElement).getPropertyValue('--dz_ls');;
     var dz_tr = getComputedStyle(document.documentElement).getPropertyValue('--dz_tr');;
 
+    // Query stuff
+    var urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('player')) {
+        if (urlParams.get('player').match(/[0-3]/g))
+            override = urlParams.get('player')
+    }
+    if (urlParams.has('ac')) {
+        if (urlParams.get('ac').match(/[0-20]/g))
+            key_accel = urlParams.get('ac') 
+    }
+    if (urlParams.has('br')) {
+        if (urlParams.get('br').match(/[0-20]/g))
+            key_brake = urlParams.get('br')
+    }
+    if (urlParams.has('ac2')) {
+        if (urlParams.get('ac2').match(/[0-20]/g))
+            key_accel2 = urlParams.get('ac2') 
+    }
+    if (urlParams.has('br2')) {
+        if (urlParams.get('br2').match(/[0-20]/g))
+            key_brake2 = urlParams.get('br2')
+    }
+
+    var keys = {
+        accel: key_accel,
+        brake: key_brake,
+        accel2: key_accel2,
+        brake2: key_brake2
+    }
+
     window.addEventListener("gamepadconnected", (event) => {
         document.getElementById("notif").style.display = "none"
+        document.getElementById("error").style.display = "none"
+        for (var i = 0; i < 4; i++) {
+            gp = navigator.getGamepads()[i]
+            if (gp != null && override == "n") {
+                gpdefault = i
+            } else if (override != "n") {
+                gpdefault = override
+            }
+        }
         setInterval(loop, 16);
     });
 
@@ -111,7 +167,7 @@
         document.getElementById("accel").style.background = "transparent";
         document.getElementById("steerR").style.background = "transparent";
         document.getElementById("steerL").style.background = "transparent";
-        document.getElementById("notif").style.display = "block"
+        document.getElementById("error").style.display = "block"
     });
 
     function loop() {
