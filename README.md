@@ -14,7 +14,3 @@ Go to [a gamepad tester website](https://greggman.github.io/html5-gamepad-test/)
 
 Change X to overwrite the acceleration key and Y to change the brake key with their corresponding IDs. For example, if you change X to 5, the visualizer will only display acceleration when you press RB, because RB = 5 as you can test on the link above. 
 https://thaumictom.github.io/webpad/index.html?ac=X&br=Y
-    
-## Version 1.0
-
-Version 1.0 is currently in very early work in progress and includes many QoL features. Planned release set to Summer 2021.
