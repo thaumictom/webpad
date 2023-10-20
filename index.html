@@ -124,19 +124,19 @@
             override = urlParams.get('player')
     }
     if (urlParams.has('ac')) {
-        if (urlParams.get('ac').match(/[0-20]/g))
+        if (urlParams.get('ac').match(/[0-9]/g))
             key_accel = urlParams.get('ac') 
     }
     if (urlParams.has('br')) {
-        if (urlParams.get('br').match(/[0-20]/g))
+        if (urlParams.get('br').match(/[0-9]/g))
             key_brake = urlParams.get('br')
     }
     if (urlParams.has('ac2')) {
-        if (urlParams.get('ac2').match(/[0-20]/g))
+        if (urlParams.get('ac2').match(/[0-9]/g))
             key_accel2 = urlParams.get('ac2') 
     }
     if (urlParams.has('br2')) {
-        if (urlParams.get('br2').match(/[0-20]/g))
+        if (urlParams.get('br2').match(/[0-9]/g))
             key_brake2 = urlParams.get('br2')
     }
 
